@@ -1,7 +1,7 @@
 package com.dyma.tennis.web;
 
 import com.dyma.tennis.Player;
-import com.dyma.tennis.PlayerList;
+import com.dyma.tennis.PlayerToSave;
 import com.dyma.tennis.service.PlayerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -14,7 +14,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 
 @Tag(name = "Tennis Players API")
@@ -41,15 +40,13 @@ public class PlayerController {
             @ApiResponse(responseCode = "200", description = "Player",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Player.class))}),
-            @ApiResponse(responseCode = "404", description = "Not found")
-
+            @ApiResponse(responseCode = "404", description = "A player with the specified last name was not found",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Error.class))})
     })
     @GetMapping("{lastName}")
     public Player getByLastName(@PathVariable("lastName") String lastName) {
-        return PlayerList.ALL.stream()
-                .filter(player -> player.lastName().equals(lastName))
-                .findFirst()
-                .orElseThrow();
+        return playerService.getByLastName(lastName);
     }
 
     @Operation(summary = "Creates a player", description = "Creates a player")
@@ -59,8 +56,8 @@ public class PlayerController {
                             schema = @Schema(implementation = Player.class))})
     })
     @PostMapping
-    public Player createPlayer(@RequestBody @Valid Player player) {
-        return player;
+    public Player createPlayer(@RequestBody @Valid PlayerToSave playerToRegister) {
+        return playerService.create(playerToRegister);
     }
 
     @Operation(summary = "Updates a player", description = "Updates a player")

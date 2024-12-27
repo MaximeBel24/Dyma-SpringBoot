@@ -1,4 +1,4 @@
 package com.dyma.tennis;
 
-public record Error() {
+public record Error(String errorDetails) {
 }
